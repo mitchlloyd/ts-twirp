@@ -1,0 +1,118 @@
+import * as pb from './service.pb';
+import * as http from 'http';
+import { errors } from 'ts-twirp';
+
+export interface RPCHandlers {
+  {{#each methods as |method|}}
+  {{lowercase method.name}}(request: pb.{{../namespace}}.{{method.requestType}}): Promise<pb.{{../namespace}}.{{method.responseType}}>;
+  {{/each}}
+}
+
+interface MessageHandler {
+  (data: Buffer, handlers: RPCHandlers): Promise<Uint8Array|string>;
+}
+
+interface RequestProcessor {
+  (
+    req: http.IncomingMessage,
+    res: http.ServerResponse,
+    handlers: RPCHandlers,
+    protobufHandler: MessageHandler,
+    jsonHandler: MessageHandler
+  ): void;
+}
+
+export function create{{service}}Handler(handlers: RPCHandlers) {
+  return function handle(req: http.IncomingMessage, res: http.ServerResponse) {
+    router(req, res, processRequest, handlers);
+  }
+}
+
+function router(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  processRequest: RequestProcessor,
+  handlers: RPCHandlers,
+) {
+  switch (req.url) {
+    {{#each methods as |method|}}
+    case '/{{../namespace}}.{{../service}}/{{method.name}}':
+      processRequest(req, res, handlers, handleProtobuf{{method.name}}, handleJSON{{method.name}});
+      break;
+    {{/each}}
+    default: 
+      throw new Error(`Could not find a handler for ${req.url}`);
+  }
+}
+
+{{#each methods as |method|}}
+async function handleProtobuf{{method.name}}(data: Buffer, handlers: RPCHandlers) {
+  const request = pb.{{../namespace}}.{{method.requestType}}.decode(data);
+  const response = await handlers.{{lowercase method.name}}(request);
+  return pb.{{../namespace}}.{{method.responseType}}.encode(response).finish();
+}
+
+async function handleJSON{{method.name}}(data: Buffer, handlers: RPCHandlers) {
+  const json = JSON.parse(data.toString('utf8'));
+  const request = pb.{{../namespace}}.{{method.requestType}}.fromObject(json);
+  const response = await handlers.{{lowercase method.name}}(request);
+  return JSON.stringify(response.toJSON());
+}
+
+{{/each}}
+
+function processRequest(
+  req: http.IncomingMessage,
+  res: http.ServerResponse,
+  handlers: RPCHandlers,
+  protobufHandler: MessageHandler,
+  jsonHandler: MessageHandler
+) {
+  const chunks: Buffer[] = [];
+  req.on('data', chunk => chunks.push(chunk));
+  req.on('end', async () => {
+    const data = Buffer.concat(chunks);
+
+    let handler: MessageHandler;
+    const contentType = req.headers["content-type"];
+    switch(contentType) {
+      case 'application/json':
+        handler = jsonHandler;
+        res.setHeader("Content-Type", "application/json");
+        break;
+      case 'application/protobuf':
+        handler = protobufHandler;
+        res.setHeader("Content-Type", "application/protobuf");
+        break;
+      default:
+        throw new Error(`unexpected Content-Type: ${contentType}`);
+    }
+
+    let buf: Uint8Array | String | undefined;
+    try {
+      buf = await handler(data, handlers);
+    } catch(e) {
+      res.setHeader("Content-Type", "application/json");
+      const statusCode = errors.serverHTTPStatusFromErrorCode(e.name);
+      if (statusCode) {
+        res.end(jsonFromError(e));
+        res.statusCode = statusCode;
+        return;
+      } else {
+        const twirpError = new errors.InternalServerError(e.message)
+        res.statusCode = 500;
+        res.end(jsonFromError(twirpError));
+        return;
+      }
+    }
+
+    res.end(buf);
+  });
+}
+
+function jsonFromError(e: Error): string {
+  return JSON.stringify({
+    code: e.name,
+    msg: e.message,
+  });
+}
