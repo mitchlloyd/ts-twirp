@@ -54,10 +54,10 @@ function twirpRPCImpl(params: TwirpRCPImplParams): RPCImpl {
         }
       });
       res.on('error', (err) => {
-        console.log('error: ', err);
+        callback(err, null);
       });
     }).on('error', (err) => {
-      console.log('error: ', err);
+      callback(err, null);
     });
 
     req.end(requestData);

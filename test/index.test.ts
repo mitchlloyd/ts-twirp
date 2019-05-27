@@ -3,7 +3,7 @@ import Example = pb.twitch.twirp.example;
 import { AsyncServer } from './async-server';
 import { createHaberdasherHandler } from './service';
 import request from 'request-promise-native';
-import { createTwirpClient } from './client';
+import { createTwirpClient } from 'ts-twirp';
 import * as protobuf from 'protobufjs';
 import * as path from 'path';
 
