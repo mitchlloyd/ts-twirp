@@ -1,6 +1,6 @@
 {
   "name": "ts-twirp",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Generate a TypesScript Twirp server",
   "main": "dist/index.js",
   "repository": "https://github.com/mitchlloyd/ts-twirp",
