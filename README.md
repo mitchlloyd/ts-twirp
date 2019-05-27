@@ -46,9 +46,9 @@ code.
 ```ts
 // ./src/server.ts
 import http from 'http';
-import { example } from './twirp';
+import { createHaberdasherHandler } from './twirp';
 
-const handler = example.createHaberdasherHandler({
+const handler = createHaberdasherHandler({
   async makeHat(size) {
     return ({
       color: 'red',
@@ -68,12 +68,12 @@ http.createServer(handler).listen(8000);
 
 ```ts
 import { createTwirpClient } from 'ts-twirp';
-import { example, Haberdasher } from './twirp';
+import { example } from './twirp';
 import * as protobuf from 'protobufjs';
 
 async function run() {
   const pb = await protobuf.load(path.join(__dirname, 'service.proto'));
-  const client = createTwirpClient({
+  const client = createTwirpClient<example.Haberdasher>({
     host: 'localhost',
     port: 8000,
     service: pb.lookupService('Haberdasher'),
