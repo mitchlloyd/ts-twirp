@@ -1,6 +1,6 @@
 {
   "name": "ts-twirp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Generate a TypesScript Twirp server",
   "main": "dist/index.js",
   "repository": "https://github.com/mitchlloyd/ts-twirp",
@@ -10,11 +10,11 @@
     "ts-twirp": "dist/run.js"
   },
   "dependencies": {
+    "espree": "^3.5.4",
     "handlebars": "^4.0.12",
-    "protobufjs": "github.com/protobufjs/protobuf.js#f61b4bc517b10c587ada6bd8e0799cccfef0dc51",
     "jsdoc": "^3.5.5",
-    "tmp": "0.0.33",
-    "espree": "^3.5.4"
+    "protobufjs": "github.com/protobufjs/protobuf.js#f61b4bc517b10c587ada6bd8e0799cccfef0dc51",
+    "tmp": "0.0.33"
   },
   "devDependencies": {
     "@types/ejs": "^2.6.0",
