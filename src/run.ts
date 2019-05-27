@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { load, Message, Root } from 'protobufjs';
 import * as path from 'path';
 import { readFileSync, writeFileSync } from 'fs';
