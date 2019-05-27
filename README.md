@@ -46,9 +46,9 @@ code.
 ```ts
 // ./src/server.ts
 import http from 'http';
-import twirp from './twirp';
+import { example } from './twirp';
 
-const handler = twirp.createHaberdasherHandler({
+const handler = example.createHaberdasherHandler({
   async makeHat(size) {
     return ({
       color: 'red',
@@ -63,17 +63,20 @@ http.createServer(handler).listen(8000);
 
 ## Make a Twirp Client
 
-> The client is half-baked at this point and missing error handling.
+> The client is currently half-baked, experimental, and will have breaking changes
+> without major semver versions.
 
 ```ts
 import { createTwirpClient } from 'ts-twirp';
-import { Haberdasher } from './twirp';
+import { example, Haberdasher } from './twirp';
+import * as protobuf from 'protobufjs';
 
 async function run() {
+  const pb = await protobuf.load(path.join(__dirname, 'service.proto'));
   const client = createTwirpClient({
     host: 'localhost',
     port: 8000,
-    service: Haberdasher
+    service: pb.lookupService('Haberdasher'),
   });
 
   const hat = await client.makeHat({

@@ -52,14 +52,13 @@ async function generateServer(root: Root, descriptor: Protofile, tsServerPath: s
 function generateIndex(root: Root, descriptor: Protofile, name: string, indexPath: string, ) {
   const service = root.lookupService(getServiceName(descriptor));
   const namespace = service.fullName.split('.').slice(1, -1).join('.');
+  const shortNamespace = namespace.split('.').slice(-1);
   const out = [
-    `import * as pb from './${name}.pb';`,
-    `import * as service from './${name}';`,
-    `export = {`,
-    `  ...pb.${namespace},`,
-    `  ...service`,
-    `};`,
-  ]
+    `import pb from './${name}.pb';`,
+    `import ${shortNamespace} = pb.${namespace};`,
+    `export { ${shortNamespace} };`,
+    `export * from './service'`,
+  ];
 
   writeFileSync(indexPath, out.join('\n'));
 }
