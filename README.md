@@ -46,9 +46,9 @@ code.
 ```ts
 // ./src/server.ts
 import http from 'http';
-import { createHaberdasherHandler } from './twirp';
+import twirp from './twirp';
 
-const handler = createHaberdasherHandler({
+const handler = twirp.createHaberdasherHandler({
   async makeHat(size) {
     return ({
       color: 'red',
