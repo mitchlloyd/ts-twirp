@@ -30,8 +30,7 @@
     "typescript": "^3.2.1"
   },
   "scripts": {
-    "servergen": "./node_modules/.bin/ts-node src/run.ts -- ./test/service.proto",
-    "pgttgen": "protoc --twirp_typescript_out=library=pbjs,version=v6:test test/service.proto",
+    "testgen": "./node_modules/.bin/ts-node src/run.ts -- ./test/service.proto",
     "build": "rm -rf ./dist && tsc && cp ./{src,dist}/server.hbs"
   }
 }
