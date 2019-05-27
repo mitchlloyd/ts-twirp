@@ -2,9 +2,11 @@ import * as pb from './service.pb';
 import * as http from 'http';
 import { errors } from 'ts-twirp';
 
+type MaybePromise<T> = Promise<T> | T;
+
 export interface RPCHandlers {
   {{#each methods as |method|}}
-  {{lowercase method.name}}(request: pb.{{../namespace}}.{{method.requestType}}): Promise<pb.{{../namespace}}.{{method.responseType}}>;
+  {{lowercase method.name}}(request: pb.{{../namespace}}.{{method.requestType}}): MaybePromise<pb.{{../namespace}}.I{{method.responseType}}>;
   {{/each}}
 }
 
@@ -40,7 +42,7 @@ function router(
       processRequest(req, res, handlers, handleProtobuf{{method.name}}, handleJSON{{method.name}});
       break;
     {{/each}}
-    default: 
+    default:
       throw new Error(`Could not find a handler for ${req.url}`);
   }
 }
@@ -56,7 +58,7 @@ async function handleJSON{{method.name}}(data: Buffer, handlers: RPCHandlers) {
   const json = JSON.parse(data.toString('utf8'));
   const request = pb.{{../namespace}}.{{method.requestType}}.fromObject(json);
   const response = await handlers.{{lowercase method.name}}(request);
-  return JSON.stringify(response.toJSON());
+  return JSON.stringify(pb.{{../namespace}}.{{method.responseType}}.create(response));
 }
 
 {{/each}}
