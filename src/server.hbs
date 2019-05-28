@@ -73,6 +73,12 @@ function processRequest(
   protobufHandler: MessageHandler,
   jsonHandler: MessageHandler
 ) {
+  if (req.method !== 'POST') {
+    const twirpError = new errors.BadRouteError(`unsupported method ${req.method} (only POST is allowed)`);
+    res.statusCode = 404;
+    res.end(jsonFromError(twirpError));
+  }
+
   const chunks: Buffer[] = [];
   req.on('data', chunk => chunks.push(chunk));
   req.on('end', async () => {
@@ -90,7 +96,11 @@ function processRequest(
         res.setHeader("Content-Type", "application/protobuf");
         break;
       default:
-        throw new Error(`unexpected Content-Type: ${contentType}`);
+        const error = new errors.BadRouteError(`unexpected Content-Type: ${contentType}`);
+        res.setHeader("Content-Type", "application/json");
+        res.statusCode = 404;
+        res.end(jsonFromError(error));
+        return;
     }
 
     let buf: Uint8Array | String | undefined;
