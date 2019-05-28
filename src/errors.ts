@@ -126,6 +126,14 @@ export class InternalServerError extends Error {
   }
 }
 
+// badRouteError is used when the twirp server cannot route a request`)
+export class BadRouteError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = TwirpError.BadRoute;
+  }
+}
+
 // ServerHTTPStatusFromErrorCode maps a Twirp error type into a similar HTTP
 // response status. It is used by the Twirp server handler to set the HTTP
 // response status code. Returns 0 if the ErrorCode is invalid.

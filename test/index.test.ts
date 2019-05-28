@@ -117,3 +117,44 @@ test('Protobuf error is returned as JSON', async () => {
 
   await s.close();
 });
+
+test('Missing route returns 404', async () => {
+  function makeHat(size: Example.Size): Promise<Example.Hat> {
+    const response = new Example.Hat({
+      color: 'red',
+      name: 'fancy hat',
+      size: size.inches,
+    });
+
+    return Promise.resolve(response);
+  }
+
+  const handler = createHaberdasherHandler({
+    makeHat,
+  });
+
+  const s = await new AsyncServer(handler).listen();
+
+  const response = await request(`http://localhost:8000/twitch.twirp.example.Haberdasher/MakePants`, {
+    body: JSON.stringify({
+      inches: 42,
+    }),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    resolveWithFullResponse: true,
+    simple: false,
+  });
+
+  try {
+    expect(response.statusCode).toEqual(404);
+    expect(response.headers['content-type']).toEqual('application/json');
+    const body = JSON.parse(response.body);
+    expect(body).toEqual({
+      code: 'bad_route',
+      msg: 'no handler for path /twitch.twirp.example.Haberdasher/MakePants',
+    });
+  } finally {
+    await s.close();
+  }
+});

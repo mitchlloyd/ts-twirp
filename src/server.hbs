@@ -43,7 +43,10 @@ function router(
       break;
     {{/each}}
     default:
-      throw new Error(`Could not find a handler for ${req.url}`);
+      const error = new errors.BadRouteError(`no handler for path ${req.url}`);
+      res.setHeader("Content-Type", "application/json");
+      res.statusCode = 404;
+      res.end(jsonFromError(error));
   }
 }
 
