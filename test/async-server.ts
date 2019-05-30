@@ -5,20 +5,27 @@ interface HTTPHandler {
 }
 
 export class AsyncServer {
+  public handler: HTTPHandler = () => {};
   private server: http.Server;
 
-  constructor(handler: HTTPHandler) {
-    this.server = http.createServer((req, res) => handler(req, res));
+  constructor(handler?: HTTPHandler) {
+    if (handler) {
+      this.handler = handler;
+    }
+
+    this.server = http.createServer((req, res) => {
+      this.handler(req, res);
+    });
 
     this.server.on('clientError', (err, socket) => {
       socket.end('HTTP/1.1 400 Bad Request\r\n\r\n');
     });
   }
 
-  listen(): Promise<http.Server> {
-    return new Promise((resolve) => { 
+  listen(): Promise<AsyncServer> {
+    return new Promise((resolve) => {
       this.server.listen(8000, () => {
-        resolve(this.server);
+        resolve(this);
       });
     });
   }

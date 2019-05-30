@@ -1,10 +1,5 @@
 import { RPCImpl } from 'protobufjs';
 import * as http from 'http';
-import * as $protobuf from "protobufjs";
-
-interface ServiceFactory<S> {
-  create(rpcImpl: $protobuf.RPCImpl, requestDelimited?: boolean, responseDelimited?: boolean): any;
-}
 
 interface CreateTwirpClientParams {
   host: string;
@@ -12,9 +7,7 @@ interface CreateTwirpClientParams {
   service: protobuf.Service;
 }
 
-export function createTwirpClient<S>(
-  params: CreateTwirpClientParams
-) {
+export function createTwirpClient<S>(params: CreateTwirpClientParams) {
   const impl = twirpRPCImpl({
     host: params.host,
     port: params.port,
@@ -31,8 +24,7 @@ interface TwirpRCPImplParams {
 
 function twirpRPCImpl(params: TwirpRCPImplParams): RPCImpl {
   const rpcImpl: RPCImpl = (method, requestData, callback) => {
-    let data: Uint8Array;
-
+    const chunks: Buffer[] = [];
     const req = http.request({
       hostname: params.host,
       port: params.port,
@@ -43,10 +35,9 @@ function twirpRPCImpl(params: TwirpRCPImplParams): RPCImpl {
         'Content-Length': Buffer.byteLength(requestData),
       },
     }, (res) => {
-      res.on('data', (chunk) => {
-        data = chunk;
-      });
+      res.on('data', chunk => chunks.push(chunk));
       res.on('end', () => {
+        const data = Buffer.concat(chunks);
         if (res.statusCode != 200) {
           callback(getTwirpError(data), null);
         } else {
