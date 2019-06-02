@@ -43,10 +43,7 @@ function router(
       break;
     {{/each}}
     default:
-      const error = new errors.BadRouteError(`no handler for path ${req.url}`);
-      res.setHeader("Content-Type", "application/json");
-      res.statusCode = 404;
-      res.end(jsonFromError(error));
+      writeError(res, new errors.BadRouteError(`no handler for path ${req.url}`));
   }
 }
 
@@ -74,9 +71,8 @@ function processRequest(
   jsonHandler: MessageHandler
 ) {
   if (req.method !== 'POST') {
-    const twirpError = new errors.BadRouteError(`unsupported method ${req.method} (only POST is allowed)`);
-    res.statusCode = 404;
-    res.end(jsonFromError(twirpError));
+    writeError(res, new errors.BadRouteError(`unsupported method ${req.method} (only POST is allowed)`));
+    return;
   }
 
   const chunks: Buffer[] = [];
@@ -96,10 +92,7 @@ function processRequest(
         res.setHeader("Content-Type", "application/protobuf");
         break;
       default:
-        const error = new errors.BadRouteError(`unexpected Content-Type: ${contentType}`);
-        res.setHeader("Content-Type", "application/json");
-        res.statusCode = 404;
-        res.end(jsonFromError(error));
+        writeError(res, new errors.BadRouteError(`unexpected Content-Type: ${contentType}`));
         return;
     }
 
@@ -107,27 +100,27 @@ function processRequest(
     try {
       buf = await handler(data, handlers);
     } catch(e) {
-      res.setHeader("Content-Type", "application/json");
-      const statusCode = errors.serverHTTPStatusFromErrorCode(e.name);
-      if (statusCode) {
-        res.end(jsonFromError(e));
-        res.statusCode = statusCode;
-        return;
-      } else {
-        const twirpError = new errors.InternalServerError(e.message)
-        res.statusCode = 500;
-        res.end(jsonFromError(twirpError));
-        return;
-      }
+      writeError(res, e);
+      return;
     }
 
     res.end(buf);
   });
 }
 
-function jsonFromError(e: Error): string {
-  return JSON.stringify({
-    code: e.name,
-    msg: e.message,
-  });
+function writeError(res: http.ServerResponse, error: Error|errors.TwirpError) {
+  res.setHeader("Content-Type", "application/json");
+
+  let twirpError: errors.TwirpError;
+  if ('isTwirpError' in error) {
+    twirpError = error;
+  } else {
+    twirpError = new errors.InternalServerError(error.message)
+  }
+
+  res.statusCode = twirpError.statusCode;
+  res.end(JSON.stringify({
+    code: twirpError.name,
+    msg: twirpError.message,
+  }));
 }

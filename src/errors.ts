@@ -2,7 +2,14 @@
  * This module provides Twirp errors according to the Twirp spec.
  */
 
-enum TwirpError {
+export class TwirpError extends Error {
+	public statusCode = 500;
+	public message: string = this.message;
+	public name = 'internal';
+	public isTwirpError: true = true;
+}
+
+enum TwirpErrorCode {
 	// Canceled indicates the operation was cancelled (typically by the caller).
 	Canceled = "canceled",
 
@@ -90,122 +97,66 @@ enum TwirpError {
 }
 
 // NotFoundError for the common NotFound error.
-export class NotFoundError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = TwirpError.NotFound;
-  }
+export class NotFoundError extends TwirpError {
+	statusCode = 404;
+	name = TwirpErrorCode.NotFound;
 }
 
 // InvalidArgumentError constructor for the common InvalidArgument error. Can be
 // used when an argument has invalid format, is a number out of range, is a bad
 // option, etc).
-export class InvalidArgumentError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = TwirpError.InvalidArgument;
-  }
+export class InvalidArgumentError extends TwirpError {
+	statusCode = 400;
+  name = TwirpErrorCode.InvalidArgument;
 }
 
 // RequiredArgumentError is a more specific constructor for InvalidArgument
 // error. Should be used when the argument is required (expected to have a
 // non-zero value).
-export class RequiredArgumentError extends Error {
-  constructor(argument: string) {
-    super(`${argument} is required`);
-    this.name = TwirpError.InvalidArgument;
+export class RequiredArgumentError extends TwirpError {
+	statusCode = 400;
+  name = TwirpErrorCode.InvalidArgument;
+  constructor(argumentName: string) {
+    super(`${argumentName} is required`);
   }
 }
 
 // InternalError constructor for the common Internal error. Should be used to
 // specify that something bad or unexpected happened.
-export class InternalServerError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = TwirpError.Internal;
-  }
+export class InternalServerError extends TwirpError {
+	statusCode = 500;
+  name = TwirpErrorCode.Internal;
 }
 
 // badRouteError is used when the twirp server cannot route a request`)
-export class BadRouteError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = TwirpError.BadRoute;
-  }
-}
-
-// ServerHTTPStatusFromErrorCode maps a Twirp error type into a similar HTTP
-// response status. It is used by the Twirp server handler to set the HTTP
-// response status code. Returns 0 if the ErrorCode is invalid.
-export function serverHTTPStatusFromErrorCode(code: TwirpError): number {
-	switch (code) {
-	case TwirpError.Canceled:
-		return 408 // RequestTimeout
-	case TwirpError.Unknown:
-		return 500 // Internal Server Error
-	case TwirpError.InvalidArgument:
-		return 400 // BadRequest
-	case TwirpError.DeadlineExceeded:
-		return 408 // RequestTimeout
-	case TwirpError.NotFound:
-		return 404 // Not Found
-	case TwirpError.BadRoute:
-		return 404 // Not Found
-	case TwirpError.AlreadyExists:
-		return 409 // Conflict
-	case TwirpError.PermissionDenied:
-		return 403 // Forbidden
-	case TwirpError.Unauthenticated:
-		return 401 // Unauthorized
-	case TwirpError.ResourceExhausted:
-		return 403 // Forbidden
-	case TwirpError.FailedPrecondition:
-		return 412 // Precondition Failed
-	case TwirpError.Aborted:
-		return 409 // Conflict
-	case TwirpError.OutOfRange:
-		return 400 // Bad Request
-	case TwirpError.Unimplemented:
-		return 501 // Not Implemented
-	case TwirpError.Internal:
-		return 500 // Internal Server Error
-	case TwirpError.Unavailable:
-		return 503 // Service Unavailable
-	case TwirpError.DataLoss:
-		return 500 // Internal Server Error
-	default:
-		return 0 // Invalid!
-	}
-}
-
-// IsValidErrorCode returns true if is one of the valid predefined constants.
-export function isValidErrorCode(code: TwirpError): boolean {
-	return serverHTTPStatusFromErrorCode(code) != 0
+export class BadRouteError extends TwirpError {
+	statusCode = 404;
+	name = TwirpErrorCode.BadRoute;
 }
 
 // twirpErrorFromIntermediary maps HTTP errors from non-twirp sources to twirp errors.
 // The mapping is similar to gRPC: https://github.com/grpc/grpc/blob/master/doc/http-grpc-status-mapping.md.
-export function twirpErrorFromIntermediary(status: number, msg: string, bodyOrLocation: string): TwirpError {
-	let code = TwirpError.Unknown;
+export function twirpErrorFromIntermediary(status: number, msg: string, bodyOrLocation: string): TwirpErrorCode {
+	let code = TwirpErrorCode.Unknown;
 	if (status >= 300 && status <= 399) {
-		code = TwirpError.Internal
+		code = TwirpErrorCode.Internal
 	} else {
 		switch (status) {
 		case 400: // Bad Request
-			code = TwirpError.Internal
+			code = TwirpErrorCode.Internal
 		case 401: // Unauthorized
-			code = TwirpError.Unauthenticated
+			code = TwirpErrorCode.Unauthenticated
 		case 403: // Forbidden
-			code = TwirpError.PermissionDenied
+			code = TwirpErrorCode.PermissionDenied
 		case 404: // Not Found
-			code = TwirpError.BadRoute
+			code = TwirpErrorCode.BadRoute
 		case 429: // Too Many Requests
 		case 502: // Bad Gateway
 		case 503: // Service Unavailable
 		case 504: // Gateway Timeout
-			code = TwirpError.Unavailable
+			code = TwirpErrorCode.Unavailable
 		default: // All other codes
-			code = TwirpError.Unknown
+			code = TwirpErrorCode.Unknown
 		}
 	}
 
