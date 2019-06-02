@@ -2,10 +2,11 @@ import * as pb from './service.pb';
 import Example = pb.twitch.twirp.example;
 import { AsyncServer } from './async-server';
 import request from 'request-promise-native';
-import { createTwirpClient } from 'ts-twirp';
-import * as protobuf from 'protobufjs';
-import * as path from 'path';
-import { example, createHaberdasherHandler, haberdasherPathPrefix } from './index';
+import {
+  createHaberdasherProtobufClient,
+  createHaberdasherHandler,
+  haberdasherPathPrefix,
+} from './index';
 
 let protobufClient: Example.Haberdasher;
 let server: AsyncServer;
@@ -13,12 +14,9 @@ let server: AsyncServer;
 beforeAll(async () => {
   server = await new AsyncServer().listen();
 
-  const pb = protobuf.loadSync(path.join(__dirname, 'service.proto'));
-  const service = pb.lookupService('Haberdasher');
-  protobufClient = createTwirpClient<example.Haberdasher>({
+  protobufClient = createHaberdasherProtobufClient({
     host: 'localhost',
     port: 8000,
-    service: service,
   });
 });
 

@@ -1,34 +1,19 @@
 import { RPCImpl } from 'protobufjs';
-import * as http from 'http';
+import http from 'http';
 
-interface CreateTwirpClientParams {
-  host: string;
-  port: number;
-  service: protobuf.Service;
-}
-
-export function createTwirpClient<S>(params: CreateTwirpClientParams) {
-  const impl = twirpRPCImpl({
-    host: params.host,
-    port: params.port,
-    path: `/twirp/${params.service.fullName.substring(1)}`,
-  });
-  return params.service.create(impl, false, false) as unknown as S;
-}
-
-interface TwirpRCPImplParams {
+interface CreateTwirpRPCImplParams {
   host: string;
   port: number;
   path: string;
 }
 
-function twirpRPCImpl(params: TwirpRCPImplParams): RPCImpl {
+export function createTwirpRPCImpl(params: CreateTwirpRPCImplParams): RPCImpl {
   const rpcImpl: RPCImpl = (method, requestData, callback) => {
     const chunks: Buffer[] = [];
     const req = http.request({
       hostname: params.host,
       port: params.port,
-      path: `${params.path}/${method.name}`,
+      path: params.path + method.name,
       method: 'POST',
       headers: {
         'Content-Type': 'application/protobuf',

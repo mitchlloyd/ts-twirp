@@ -1,0 +1,25 @@
+import pb from './service.pb';
+import {{shortNamespace}} = pb.{{namespace}};
+import { createTwirpRPCImpl } from 'ts-twirp/client';
+
+interface Create{{service}}ClientParams {
+  /**
+   * The host portion of the URL to use.
+   */
+  host: string;
+
+  /**
+   * The port used to call the service.
+   */
+  port: 8000;
+}
+
+export function create{{service}}ProtobufClient(params: Create{{service}}ClientParams) {
+  const rpcImpl = createTwirpRPCImpl({
+    host: params.host,
+    port: params.port,
+    path: '/twirp/{{namespace}}.{{service}}/',
+  });
+
+  return {{shortNamespace}}.{{service}}.create(rpcImpl, false, false);
+}
