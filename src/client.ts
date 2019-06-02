@@ -11,7 +11,7 @@ export function createTwirpClient<S>(params: CreateTwirpClientParams) {
   const impl = twirpRPCImpl({
     host: params.host,
     port: params.port,
-    path: `${params.service.fullName.substring(1)}`,
+    path: `/twirp/${params.service.fullName.substring(1)}`,
   });
   return params.service.create(impl, false, false) as unknown as S;
 }
@@ -28,7 +28,7 @@ function twirpRPCImpl(params: TwirpRCPImplParams): RPCImpl {
     const req = http.request({
       hostname: params.host,
       port: params.port,
-      path: `/${params.path}/${method.name}`,
+      path: `${params.path}/${method.name}`,
       method: 'POST',
       headers: {
         'Content-Type': 'application/protobuf',

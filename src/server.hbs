@@ -4,7 +4,7 @@ import { TwirpContentType, handleRequest } from 'ts-twirp/server-runtime';
 
 type MaybePromise<T> = Promise<T> | T;
 
-export const {{lowercase service}}PathPrefix = '/{{namespace}}.{{service}}/';
+export const {{lowercase service}}PathPrefix = '/twirp/{{namespace}}.{{service}}/';
 
 export interface RPCHandlers {
   {{#each methods as |method|}}
@@ -21,7 +21,7 @@ export function create{{service}}Handler(rpcHandlers: RPCHandlers) {
 function route(url: string | undefined, contentType: TwirpContentType) {
   switch (url) {
     {{#each methods as |method|}}
-    case '/{{../namespace}}.{{../service}}/{{method.name}}':
+    case '/twirp/{{../namespace}}.{{../service}}/{{method.name}}':
       return contentType === TwirpContentType.Protobuf ? handleProtobuf{{method.name}} : handleJSON{{method.name}};
     {{/each}}
     default:

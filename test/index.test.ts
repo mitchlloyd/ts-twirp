@@ -59,7 +59,7 @@ test('Handling a Twirp JSON call', async () => {
     }
   });
 
-  const response = await request(`http://localhost:8000/twitch.twirp.example.Haberdasher/MakeHat`, {
+  const response = await request(`http://localhost:8000${haberdasherPathPrefix}MakeHat`, {
     body: JSON.stringify({
       inches: 42,
     }),
@@ -106,7 +106,7 @@ test('Missing route returns 404', async () => {
     }
   });
 
-  const response = await request(`http://localhost:8000/twitch.twirp.example.Haberdasher/MakePants`, {
+  const response = await request(`http://localhost:8000${haberdasherPathPrefix}MakePants`, {
     body: JSON.stringify({
       inches: 42,
     }),
@@ -123,7 +123,7 @@ test('Missing route returns 404', async () => {
   const body = JSON.parse(response.body);
   expect(body).toEqual({
     code: 'bad_route',
-    msg: 'no handler for path /twitch.twirp.example.Haberdasher/MakePants',
+    msg: `no handler for path ${haberdasherPathPrefix}MakePants`,
   });
 });
 
@@ -138,7 +138,7 @@ test('Unknown content type returns 404', async () => {
     }
   });
 
-  const response = await request(`http://localhost:8000/twitch.twirp.example.Haberdasher/MakeHat`, {
+  const response = await request(`http://localhost:8000${haberdasherPathPrefix}MakeHat`, {
     body: JSON.stringify({
       inches: 42,
     }),
@@ -170,7 +170,7 @@ test('Non POST verb returns 404', async () => {
     }
   });
 
-  const response = await request(`http://localhost:8000/twitch.twirp.example.Haberdasher/MakeHat`, {
+  const response = await request(`http://localhost:8000${haberdasherPathPrefix}MakeHat`, {
     body: JSON.stringify({
       inches: 42,
     }),
@@ -192,5 +192,5 @@ test('Non POST verb returns 404', async () => {
 });
 
 test('exposing the path prefix', async () => {
-  expect(haberdasherPathPrefix).toBe('/twitch.twirp.example.Haberdasher/');
+  expect(haberdasherPathPrefix).toBe('/twirp/twitch.twirp.example.Haberdasher/');
 });
