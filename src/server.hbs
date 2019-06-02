@@ -1,6 +1,6 @@
 import * as pb from './service.pb';
 import * as http from 'http';
-import { errors } from 'ts-twirp';
+import { TwirpContentType, handleRequest } from 'ts-twirp/server-runtime';
 
 type MaybePromise<T> = Promise<T> | T;
 
@@ -10,117 +10,37 @@ export interface RPCHandlers {
   {{/each}}
 }
 
-interface MessageHandler {
-  (data: Buffer, handlers: RPCHandlers): Promise<Uint8Array|string>;
-}
-
-interface RequestProcessor {
-  (
-    req: http.IncomingMessage,
-    res: http.ServerResponse,
-    handlers: RPCHandlers,
-    protobufHandler: MessageHandler,
-    jsonHandler: MessageHandler
-  ): void;
-}
-
-export function create{{service}}Handler(handlers: RPCHandlers) {
-  return function handle(req: http.IncomingMessage, res: http.ServerResponse) {
-    router(req, res, processRequest, handlers);
+export function create{{service}}Handler(rpcHandlers: RPCHandlers) {
+  return function {{lowercase service}}Handler(req: http.IncomingMessage, res: http.ServerResponse) {
+    handleRequest(req, res, route, rpcHandlers);
   }
 }
 
-function router(
-  req: http.IncomingMessage,
-  res: http.ServerResponse,
-  processRequest: RequestProcessor,
-  handlers: RPCHandlers,
-) {
-  switch (req.url) {
+function route(url: string | undefined, contentType: TwirpContentType) {
+  switch (url) {
     {{#each methods as |method|}}
     case '/{{../namespace}}.{{../service}}/{{method.name}}':
-      processRequest(req, res, handlers, handleProtobuf{{method.name}}, handleJSON{{method.name}});
-      break;
+      return contentType === TwirpContentType.Protobuf ? handleProtobuf{{method.name}} : handleJSON{{method.name}};
     {{/each}}
     default:
-      writeError(res, new errors.BadRouteError(`no handler for path ${req.url}`));
+      return;
   }
 }
 
 {{#each methods as |method|}}
-async function handleProtobuf{{method.name}}(data: Buffer, handlers: RPCHandlers) {
+async function handleProtobuf{{method.name}}(data: Buffer, handlers: RPCHandlers): Promise<Uint8Array> {
   const request = pb.{{../namespace}}.{{method.requestType}}.decode(data);
   const response = await handlers.{{lowercase method.name}}(request);
   return pb.{{../namespace}}.{{method.responseType}}.encode(response).finish();
 }
 
-async function handleJSON{{method.name}}(data: Buffer, handlers: RPCHandlers) {
+async function handleJSON{{method.name}}(data: Buffer, handlers: RPCHandlers): Promise<string> {
   const json = JSON.parse(data.toString('utf8'));
   const request = pb.{{../namespace}}.{{method.requestType}}.fromObject(json);
   const response = await handlers.{{lowercase method.name}}(request);
   return JSON.stringify(pb.{{../namespace}}.{{method.responseType}}.create(response));
 }
-
-{{/each}}
-
-function processRequest(
-  req: http.IncomingMessage,
-  res: http.ServerResponse,
-  handlers: RPCHandlers,
-  protobufHandler: MessageHandler,
-  jsonHandler: MessageHandler
-) {
-  if (req.method !== 'POST') {
-    writeError(res, new errors.BadRouteError(`unsupported method ${req.method} (only POST is allowed)`));
-    return;
-  }
-
-  const chunks: Buffer[] = [];
-  req.on('data', chunk => chunks.push(chunk));
-  req.on('end', async () => {
-    const data = Buffer.concat(chunks);
-
-    let handler: MessageHandler;
-    const contentType = req.headers["content-type"];
-    switch(contentType) {
-      case 'application/json':
-        handler = jsonHandler;
-        res.setHeader("Content-Type", "application/json");
-        break;
-      case 'application/protobuf':
-        handler = protobufHandler;
-        res.setHeader("Content-Type", "application/protobuf");
-        break;
-      default:
-        writeError(res, new errors.BadRouteError(`unexpected Content-Type: ${contentType}`));
-        return;
-    }
-
-    let buf: Uint8Array | String | undefined;
-    try {
-      buf = await handler(data, handlers);
-    } catch(e) {
-      writeError(res, e);
-      return;
-    }
-
-    res.end(buf);
-  });
-}
-
-function writeError(res: http.ServerResponse, error: Error|errors.TwirpError) {
-  res.setHeader("Content-Type", "application/json");
-
-  let twirpError: errors.TwirpError;
-  if ('isTwirpError' in error) {
-    twirpError = error;
-  } else {
-    twirpError = new errors.InternalServerError(error.message)
-  }
-
-  res.statusCode = twirpError.statusCode;
-  res.end(JSON.stringify({
-    code: twirpError.name,
-    msg: twirpError.message,
-  }));
-}
+{{#if (not-last-value method ../methods)}}
+  {{"\n"}}
+{{/if}}
+{{~/each}}

@@ -2,8 +2,10 @@
   "compilerOptions": {
     "esModuleInterop": true,
     "baseUrl": "./",
+    "strict": true,
     "paths": {
-      "ts-twirp": ["../src"]
+      "ts-twirp": ["../src"],
+      "ts-twirp/*": ["../src/*"]
     },
   },
   "exclude": []

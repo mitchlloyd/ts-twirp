@@ -6,7 +6,6 @@ import { createTwirpClient } from 'ts-twirp';
 import * as protobuf from 'protobufjs';
 import * as path from 'path';
 import { example, createHaberdasherHandler } from './index';
-import * as http from 'http';
 
 let protobufClient: Example.Haberdasher;
 let server: AsyncServer;
@@ -139,7 +138,7 @@ test('Unknown content type returns 404', async () => {
     }
   });
 
-  const response = await request(`http://localhost:8000/twitch.twirp.example.Haberdasher/MakePants`, {
+  const response = await request(`http://localhost:8000/twitch.twirp.example.Haberdasher/MakeHat`, {
     body: JSON.stringify({
       inches: 42,
     }),
@@ -156,7 +155,7 @@ test('Unknown content type returns 404', async () => {
   const body = JSON.parse(response.body);
   expect(body).toEqual({
     code: 'bad_route',
-    msg: 'no handler for path /twitch.twirp.example.Haberdasher/MakePants',
+    msg: 'unexpected Content-Type: image/png',
   });
 });
 
@@ -171,7 +170,7 @@ test('Non POST verb returns 404', async () => {
     }
   });
 
-  const response = await request(`http://localhost:8000/twitch.twirp.example.Haberdasher/MakePants`, {
+  const response = await request(`http://localhost:8000/twitch.twirp.example.Haberdasher/MakeHat`, {
     body: JSON.stringify({
       inches: 42,
     }),
@@ -188,6 +187,6 @@ test('Non POST verb returns 404', async () => {
   const body = JSON.parse(response.body);
   expect(body).toEqual({
     code: 'bad_route',
-    msg: 'no handler for path /twitch.twirp.example.Haberdasher/MakePants',
+    msg: 'unsupported method GET (only POST is allowed)',
   });
 });
