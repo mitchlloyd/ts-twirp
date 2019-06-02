@@ -4,6 +4,8 @@ import { TwirpContentType, handleRequest } from 'ts-twirp/server-runtime';
 
 type MaybePromise<T> = Promise<T> | T;
 
+export const {{lowercase service}}PathPrefix = '/{{namespace}}.{{service}}/';
+
 export interface RPCHandlers {
   {{#each methods as |method|}}
   {{lowercase method.name}}(request: pb.{{../namespace}}.{{method.requestType}}): MaybePromise<pb.{{../namespace}}.I{{method.responseType}}>;

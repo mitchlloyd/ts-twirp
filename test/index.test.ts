@@ -5,7 +5,7 @@ import request from 'request-promise-native';
 import { createTwirpClient } from 'ts-twirp';
 import * as protobuf from 'protobufjs';
 import * as path from 'path';
-import { example, createHaberdasherHandler } from './index';
+import { example, createHaberdasherHandler, haberdasherPathPrefix } from './index';
 
 let protobufClient: Example.Haberdasher;
 let server: AsyncServer;
@@ -189,4 +189,8 @@ test('Non POST verb returns 404', async () => {
     code: 'bad_route',
     msg: 'unsupported method GET (only POST is allowed)',
   });
+});
+
+test('exposing the path prefix', async () => {
+  expect(haberdasherPathPrefix).toBe('/twitch.twirp.example.Haberdasher/');
 });
