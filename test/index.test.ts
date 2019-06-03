@@ -24,12 +24,12 @@ beforeAll(async () => {
   jsonClient = createHaberdasherJSONClient({
     host: 'localhost',
     port: 8000,
-  })
+  });
 });
 
 afterAll(async () => {
   server.close();
-})
+});
 
 test('Handling a Twirp protobuf call', async () => {
   server.handler = createHaberdasherHandler({
@@ -39,7 +39,7 @@ test('Handling a Twirp protobuf call', async () => {
         name: 'fancy hat',
         size: size.inches,
       };
-    }
+    },
   });
 
   const response = await protobufClient.makeHat({
@@ -61,7 +61,7 @@ test('Handling a Twirp JSON call', async () => {
         name: 'fancy hat',
         size: size.inches,
       };
-    }
+    },
   });
 
   const response = await jsonClient.makeHat({
@@ -78,18 +78,20 @@ test('Handling a Twirp JSON call', async () => {
 test('Protobuf error is returned as JSON', async () => {
   server.handler = createHaberdasherHandler({
     makeHat(size: Example.Size) {
-      throw new Error("thrown!");
-    }
+      throw new Error('thrown!');
+    },
   });
 
   const request = protobufClient.makeHat({
     inches: 42,
   });
 
-  await expect(request).rejects.toEqual(expect.objectContaining({
-    message: 'thrown!',
-    name: 'internal',
-  }));
+  await expect(request).rejects.toEqual(
+    expect.objectContaining({
+      message: 'thrown!',
+      name: 'internal',
+    }),
+  );
 });
 
 test('Missing route returns 404', async () => {
@@ -100,7 +102,7 @@ test('Missing route returns 404', async () => {
         name: 'fancy hat',
         size: size.inches,
       };
-    }
+    },
   });
 
   const response = await request(`http://localhost:8000${haberdasherPathPrefix}MakePants`, {
@@ -108,7 +110,7 @@ test('Missing route returns 404', async () => {
       inches: 42,
     }),
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     resolveWithFullResponse: true,
     simple: false,
@@ -132,7 +134,7 @@ test('Unknown content type returns 404', async () => {
         name: 'fancy hat',
         size: size.inches,
       };
-    }
+    },
   });
 
   const response = await request(`http://localhost:8000${haberdasherPathPrefix}MakeHat`, {
@@ -140,7 +142,7 @@ test('Unknown content type returns 404', async () => {
       inches: 42,
     }),
     headers: {
-      "Content-Type": "image/png",
+      'Content-Type': 'image/png',
     },
     resolveWithFullResponse: true,
     simple: false,
@@ -164,7 +166,7 @@ test('Non POST verb returns 404', async () => {
         name: 'fancy hat',
         size: size.inches,
       };
-    }
+    },
   });
 
   const response = await request(`http://localhost:8000${haberdasherPathPrefix}MakeHat`, {
@@ -172,7 +174,7 @@ test('Non POST verb returns 404', async () => {
       inches: 42,
     }),
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     resolveWithFullResponse: true,
     simple: false,

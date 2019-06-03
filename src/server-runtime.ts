@@ -7,7 +7,10 @@ export enum TwirpContentType {
   Unknown,
 }
 
-type Router<T> = (url: string | undefined, contentType: TwirpContentType) => undefined | TwirpHandler<T>;
+type Router<T> = (
+  url: string | undefined,
+  contentType: TwirpContentType,
+) => undefined | TwirpHandler<T>;
 type TwirpHandler<T> = (data: Buffer, rpcHandlers: T) => Promise<Uint8Array | String>;
 
 function getContentType(mimeType: string | undefined): TwirpContentType {
@@ -28,7 +31,10 @@ export async function handleRequest<T>(
   rpcHandlers: T,
 ) {
   if (req.method !== 'POST') {
-    writeError(res, new errors.BadRouteError(`unsupported method ${req.method} (only POST is allowed)`));
+    writeError(
+      res,
+      new errors.BadRouteError(`unsupported method ${req.method} (only POST is allowed)`),
+    );
     return;
   }
 
@@ -53,7 +59,7 @@ export async function handleRequest<T>(
   let requestData;
   try {
     requestData = await getRequestData(req);
-  } catch(e) {
+  } catch (e) {
     writeError(res, e);
     return;
   }
@@ -61,7 +67,7 @@ export async function handleRequest<T>(
   let responseData;
   try {
     responseData = await handler(requestData, rpcHandlers);
-  } catch(e) {
+  } catch (e) {
     writeError(res, e);
     return;
   }
@@ -84,19 +90,21 @@ export function getRequestData(req: http.IncomingMessage): Promise<Buffer> {
   });
 }
 
-export function writeError(res: http.ServerResponse, error: Error|errors.TwirpError) {
-  res.setHeader("Content-Type", "application/json");
+export function writeError(res: http.ServerResponse, error: Error | errors.TwirpError) {
+  res.setHeader('Content-Type', 'application/json');
 
   let twirpError: errors.TwirpError;
   if ('isTwirpError' in error) {
     twirpError = error;
   } else {
-    twirpError = new errors.InternalServerError(error.message)
+    twirpError = new errors.InternalServerError(error.message);
   }
 
   res.statusCode = twirpError.statusCode;
-  res.end(JSON.stringify({
-    code: twirpError.name,
-    msg: twirpError.message,
-  }));
+  res.end(
+    JSON.stringify({
+      code: twirpError.name,
+      msg: twirpError.message,
+    }),
+  );
 }

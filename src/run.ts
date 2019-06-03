@@ -17,12 +17,12 @@ type Protofile = Message<descriptor.IFileDescriptorSet>;
 async function run() {
   const protofilePath = process.argv[2];
   if (!protofilePath) {
-    throw new Error("Provide the path to a service.proto file");
+    throw new Error('Provide the path to a service.proto file');
   }
 
   const fileParts = path.parse(protofilePath);
   if (fileParts.ext !== '.proto') {
-    throw new Error("Path must point to a .proto file");
+    throw new Error('Path must point to a .proto file');
   }
 
   const runtimeJSPath = `${fileParts.dir}/${fileParts.name}.pb.js`;
@@ -33,7 +33,10 @@ async function run() {
   const root = await load(protofilePath);
   const descriptor: Protofile = (root as any).toDescriptor('proto3');
   const service = root.lookupService(getServiceName(descriptor));
-  const namespace = service.fullName.split('.').slice(1, -1).join('.');
+  const namespace = service.fullName
+    .split('.')
+    .slice(1, -1)
+    .join('.');
   const shortNamespace = namespace.split('.').slice(-1);
 
   const templateContext = {
