@@ -12,10 +12,6 @@ Handlebars.registerHelper('lowercase', function(text: string) {
   return text.charAt(0).toLocaleLowerCase() + text.slice(1);
 });
 
-Handlebars.registerHelper('not-last-value', function(value: unknown, object: {}) {
-  return value !== Object.values(object).slice(-1)[0];
-});
-
 type Protofile = Message<descriptor.IFileDescriptorSet>;
 
 async function run() {

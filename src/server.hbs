@@ -28,8 +28,8 @@ function route(url: string | undefined, contentType: TwirpContentType) {
       return;
   }
 }
-
 {{#each methods as |method|}}
+
 async function handleProtobuf{{method.name}}(data: Buffer, handlers: RPCHandlers): Promise<Uint8Array> {
   const request = pb.{{../namespace}}.{{method.requestType}}.decode(data);
   const response = await handlers.{{lowercase method.name}}(request);
@@ -42,7 +42,4 @@ async function handleJSON{{method.name}}(data: Buffer, handlers: RPCHandlers): P
   const response = await handlers.{{lowercase method.name}}(request);
   return JSON.stringify(pb.{{../namespace}}.{{method.responseType}}.create(response));
 }
-{{#if (not-last-value method ../methods)}}
-  {{"\n"}}
-{{/if}}
-{{~/each}}
+{{/each}}
