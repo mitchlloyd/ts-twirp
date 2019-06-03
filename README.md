@@ -37,7 +37,7 @@ This generates sibling files in the same directory.
     service.pb.d.ts # Protobuf types generated from your *.protofile
     service.pb.ts # Runtime protobuf serialization/deserialization code
     service.proto # The service protobuf definition
-    service.ts # Runtime TypeScript server code
+    server.ts # Runtime TypeScript server code
 ```
 
 Use `src/twirp/index.ts` as the entry point to the service types and runtime
@@ -63,23 +63,41 @@ http.createServer(handler).listen(8000);
 
 ## Make a Twirp Client
 
-> The client is currently half-baked, experimental, and will have breaking changes
-> without major semver versions.
+Running the generator will create both a protobuf and a JSON client.
+
+Using the protobuf client:
 
 ```ts
-import { createTwirpClient } from 'ts-twirp';
-import { example } from './twirp';
-import * as protobuf from 'protobufjs';
+import { createHaberdasherProtobufClient } from './twirp';
 
 async function run() {
-  const pb = await protobuf.load(path.join(__dirname, 'service.proto'));
-  const client = createTwirpClient<example.Haberdasher>({
+  const haberdasher = createHaberdasherProtobufClient({
     host: 'localhost',
     port: 8000,
-    service: pb.lookupService('Haberdasher'),
   });
 
-  const hat = await client.makeHat({
+  const hat = await haberdasher.makeHat({
+    inches: 42
+  });
+
+  console.log(hat);
+}
+
+run();
+```
+
+As you might expect using the JSON client is nearly identical.
+
+```ts
+import { createHaberdasherJSONClient } from './twirp';
+
+async function run() {
+  const haberdasher = createHaberdasherJSONClient({
+    host: 'localhost',
+    port: 8000,
+  });
+
+  const hat = await haberdasher.makeHat({
     inches: 42
   });
 
