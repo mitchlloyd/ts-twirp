@@ -15,7 +15,7 @@ export interface RPCHandlers {
 export function create{{service}}Handler(rpcHandlers: RPCHandlers) {
   return function {{lowercase service}}Handler(req: http.IncomingMessage, res: http.ServerResponse) {
     handleRequest(req, res, route, rpcHandlers);
-  }
+  };
 }
 
 function route(url: string | undefined, contentType: TwirpContentType) {
