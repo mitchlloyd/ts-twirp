@@ -44,7 +44,7 @@ async function run() {
     protoFilename: fileParts.name,
   };
 
-  await generateServer(`${fileParts.dir}/${fileParts.name}.ts`, templateContext);
+  await generateServer(`${fileParts.dir}/server.ts`, templateContext);
   await generateClient(`${fileParts.dir}/client.ts`, templateContext);
   await generateIndex(`${fileParts.dir}/index.ts`, templateContext);
 }
