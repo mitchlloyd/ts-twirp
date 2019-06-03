@@ -44,12 +44,8 @@ async function run() {
     protoFilename: fileParts.name,
   };
 
-  const tsServerPath = `${fileParts.dir}/${fileParts.name}.ts`;
-  await generateServer(tsServerPath, templateContext);
-
-  const tsClientPath = `${fileParts.dir}/client.ts`;
-  await generateClient(tsClientPath, templateContext);
-
+  await generateServer(`${fileParts.dir}/${fileParts.name}.ts`, templateContext);
+  await generateClient(`${fileParts.dir}/client.ts`, templateContext);
   await generateIndex(`${fileParts.dir}/index.ts`, templateContext);
 }
 
