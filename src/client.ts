@@ -7,7 +7,7 @@ interface CreateTwirpRPCImplParams {
   path: string;
 }
 
-export function createTwirpRPCImpl(params: CreateTwirpRPCImplParams): RPCImpl {
+export function createProtobufRPCImpl(params: CreateTwirpRPCImplParams): RPCImpl {
   const rpcImpl: RPCImpl = (method, requestData, callback) => {
     const chunks: Buffer[] = [];
     const req = http.request({
@@ -40,6 +40,49 @@ export function createTwirpRPCImpl(params: CreateTwirpRPCImplParams): RPCImpl {
   }
 
   return rpcImpl;
+}
+
+interface JSONReadyObject {
+  toJSON: () => {[key: string]: any};
+}
+
+export type JSONRPCImpl = (obj: JSONReadyObject, methodName: string) => Promise<{}>;
+
+export function createJSONRPCImpl(params: CreateTwirpRPCImplParams): JSONRPCImpl {
+  return function doJSONRequest(obj: JSONReadyObject, methodName: string): Promise<{}> {
+    const json = JSON.stringify(obj.toJSON());
+
+    return new Promise((resolve, reject) => {
+      const chunks: Buffer[] = [];
+      const req = http.request({
+        hostname: params.host,
+        port: params.port,
+        path: params.path + methodName,
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Content-Length': json.length,
+        },
+      }, (res) => {
+        res.on('data', chunk => chunks.push(chunk));
+        res.on('end', () => {
+          const data = Buffer.concat(chunks);
+          if (res.statusCode != 200) {
+            reject(getTwirpError(data));
+          } else {
+            resolve(JSON.parse(data.toString()));
+          }
+        });
+        res.on('error', (err) => {
+          reject(err);
+        });
+      }).on('error', (err) => {
+        reject(err);
+      });
+
+      req.end(json);
+    })
+  }
 }
 
 function getTwirpError(data: Uint8Array): Error {

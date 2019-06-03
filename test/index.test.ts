@@ -7,8 +7,10 @@ import {
   createHaberdasherHandler,
   haberdasherPathPrefix,
 } from './index';
+import { HaberdasherJSONClient, createHaberdasherJSONClient } from './client';
 
 let protobufClient: Example.Haberdasher;
+let jsonClient: HaberdasherJSONClient;
 let server: AsyncServer;
 
 beforeAll(async () => {
@@ -18,6 +20,11 @@ beforeAll(async () => {
     host: 'localhost',
     port: 8000,
   });
+
+  jsonClient = createHaberdasherJSONClient({
+    host: 'localhost',
+    port: 8000,
+  })
 });
 
 afterAll(async () => {
@@ -57,19 +64,11 @@ test('Handling a Twirp JSON call', async () => {
     }
   });
 
-  const response = await request(`http://localhost:8000${haberdasherPathPrefix}MakeHat`, {
-    body: JSON.stringify({
-      inches: 42,
-    }),
-    headers: {
-      "Content-Type": "application/json",
-    },
-    resolveWithFullResponse: true,
-    method: 'POST',
+  const response = await jsonClient.makeHat({
+    inches: 42,
   });
 
-  expect(response.headers['content-length']).toEqual("44");
-  expect(JSON.parse(response.body)).toEqual({
+  expect(response).toEqual({
     size: 42,
     name: 'fancy hat',
     color: 'red',
