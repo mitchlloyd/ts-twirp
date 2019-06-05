@@ -16,6 +16,7 @@
     "protobufjs": "github.com/protobufjs/protobuf.js#f61b4bc517b10c587ada6bd8e0799cccfef0dc51",
     "tmp": "0.0.33"
   },
+  "files": "dist/**/*",
   "devDependencies": {
     "@types/ejs": "^2.6.0",
     "@types/jest": "^23.3.10",

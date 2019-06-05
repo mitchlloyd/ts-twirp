@@ -1,6 +1,6 @@
 import pb from './service.pb';
 import {{shortNamespace}} = pb.{{namespace}};
-import { createProtobufRPCImpl, createJSONRPCImpl, JSONRPCImpl } from 'ts-twirp/client';
+import { createProtobufRPCImpl, createJSONRPCImpl, JSONRPCImpl } from 'ts-twirp';
 
 interface Create{{service}}ClientParams {
   /**
@@ -11,12 +11,12 @@ interface Create{{service}}ClientParams {
   /**
    * The port used to call the service.
    */
-  port: 8000;
+  port: number;
 }
 
 export function create{{service}}ProtobufClient(
   params: Create{{service}}ClientParams
-): example.{{service}} {
+): {{shortNamespace}}.{{service}} {
   const rpcImpl = createProtobufRPCImpl({
     host: params.host,
     port: params.port,
@@ -32,10 +32,10 @@ export function create{{service}}JSONClient(
   const rpcImpl = createJSONRPCImpl({
     host: params.host,
     port: params.port,
-    path: '/twirp/twitch.twirp.example.Haberdasher/',
+    path: '/twirp/{{namespace}}.{{service}}/',
   });
 
-  return new HaberdasherJSONClient(rpcImpl);
+  return new {{service}}JSONClient(rpcImpl);
 }
 
 export class {{service}}JSONClient {
@@ -46,10 +46,10 @@ export class {{service}}JSONClient {
   }
   {{#each methods as |method|}}
 
-  public async {{lowercase method.name}}(request: example.ISize): Promise<example.Hat> {
+  public async {{lowercase method.name}}(request: {{../shortNamespace}}.I{{method.requestType}}): Promise<{{../shortNamespace}}.{{method.responseType}}> {
     const requestMessage = {{../shortNamespace}}.{{method.requestType}}.create(request);
     const response = await this.rpcImpl(requestMessage, '{{method.name}}');
-    const verificationError = example.{{method.responseType}}.verify(response);
+    const verificationError = {{../shortNamespace}}.{{method.responseType}}.verify(response);
     if (verificationError) {
       return Promise.reject(verificationError);
     }
