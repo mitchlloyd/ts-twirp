@@ -31,6 +31,7 @@
   },
   "scripts": {
     "testgen": "./node_modules/.bin/ts-node src/run.ts -- ./test/service.proto",
-    "build": "rm -rf ./dist && tsc && cp ./{src,dist}/server.hbs"
+    "cp-templates": "find src -name '*.hbs' -exec cp {} dist \\;",
+    "dist": "rm -rf ./dist && tsc && yarn cp-templates"
   }
 }
