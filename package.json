@@ -13,7 +13,7 @@
     "espree": "^3.5.4",
     "handlebars": "^4.0.12",
     "jsdoc": "^3.5.5",
-    "protobufjs": "github.com/protobufjs/protobuf.js#f61b4bc517b10c587ada6bd8e0799cccfef0dc51",
+    "protobufjs": "6.8.8",
     "tmp": "0.0.33"
   },
   "files": "dist/**/*",
