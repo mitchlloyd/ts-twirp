@@ -16,7 +16,7 @@ interface Create{{service}}ClientParams {
 
 export function create{{service}}ProtobufClient(
   params: Create{{service}}ClientParams
-): {{shortNamespace}}.{{service}} {
+): {{service}} {
   const rpcImpl = createProtobufRPCImpl({
     host: params.host,
     port: params.port,
@@ -28,7 +28,7 @@ export function create{{service}}ProtobufClient(
 
 export function create{{service}}JSONClient(
   params: Create{{service}}ClientParams
-): {{service}}JSONClient {
+): {{service}} {
   const rpcImpl = createJSONRPCImpl({
     host: params.host,
     port: params.port,
@@ -38,7 +38,13 @@ export function create{{service}}JSONClient(
   return new {{service}}JSONClient(rpcImpl);
 }
 
-export class {{service}}JSONClient {
+export interface {{service}} {
+  {{#each methods as |method|}}
+  {{lowercase method.name}}(request: {{../shortNamespace}}.I{{method.requestType}}): Promise<{{../shortNamespace}}.{{method.responseType}}>;
+  {{/each}}
+}
+
+export class {{service}}JSONClient implements {{service}} {
   private rpcImpl: JSONRPCImpl;
 
   constructor(rpcImpl: JSONRPCImpl) {

@@ -7,10 +7,10 @@ import {
   createHaberdasherHandler,
   haberdasherPathPrefix,
 } from './index';
-import { HaberdasherJSONClient, createHaberdasherJSONClient } from './client';
+import { createHaberdasherJSONClient, Haberdasher } from './client';
 
-let protobufClient: Example.Haberdasher;
-let jsonClient: HaberdasherJSONClient;
+let protobufClient: Haberdasher;
+let jsonClient: Haberdasher;
 let server: AsyncServer;
 
 beforeAll(async () => {
