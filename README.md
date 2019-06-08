@@ -38,7 +38,7 @@ This generates sibling files in the same directory.
 /src
   /twirp
     index.ts # Exports the code you'll use to implement your server
-    service.pb.d.ts # Protobuf types generated from your *.protofile
+    service.pb.d.ts # Protobuf types generated from your service.proto file
     service.pb.ts # Runtime protobuf serialization/deserialization code
     service.proto # The service protobuf definition
     server.ts # Runtime TypeScript server code
