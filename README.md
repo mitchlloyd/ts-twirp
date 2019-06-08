@@ -1,3 +1,7 @@
+# ts-twirp
+
+[![Build Status](https://travis-ci.org/mitchlloyd/ts-twirp.svg?branch=master)](https://travis-ci.org/mitchlloyd/ts-twirp)
+
 ts-twirp is a TypeScript code generator for [Twirp](https://github.com/twitchtv/twirp) servers and clients.
 
 > The client portion of this library is nascent.
