@@ -16,7 +16,7 @@
     "protobufjs": "6.8.8",
     "tmp": "0.0.33"
   },
-  "files": "dist/**/*",
+  "files": ["dist/**/*"],
   "devDependencies": {
     "@types/ejs": "^2.6.0",
     "@types/jest": "^23.3.10",
