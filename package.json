@@ -1,6 +1,6 @@
 {
   "name": "ts-twirp",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "Generate a TypesScript Twirp server",
   "main": "dist/index.js",
   "repository": "https://github.com/mitchlloyd/ts-twirp",
@@ -16,7 +16,9 @@
     "protobufjs": "6.8.8",
     "tmp": "0.0.33"
   },
-  "files": ["dist/**/*"],
+  "files": [
+    "dist/**/*"
+  ],
   "devDependencies": {
     "@types/ejs": "^2.6.0",
     "@types/jest": "^23.3.10",
