@@ -36,7 +36,7 @@
     "testgen": "./node_modules/.bin/ts-node src/run.ts -- ./test/service.proto",
     "cp-templates": "find src -name '*.hbs' -exec cp {} dist \\;",
     "dist": "rm -rf ./dist && tsc && yarn cp-templates",
-    "prerelease": "yarn jest && yarn dist && yarn version",
-    "ci": "yarn testgen && yarn jest"
+    "ci": "yarn testgen && yarn jest",
+    "prerelease": "npm run ci && npm run dist"
   }
 }
