@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import { jsonToMessageProperties } from './client';
 
 test('converting JSON responses to message properties', () => {

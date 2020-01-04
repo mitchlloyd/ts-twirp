@@ -10,6 +10,9 @@
     "ts-twirp": "dist/run.js"
   },
   "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^2.14.0",
+    "@typescript-eslint/parser": "^2.14.0",
+    "eslint": "^6.8.0",
     "espree": "^3.5.4",
     "handlebars": "^4.5.3",
     "jsdoc": "^3.6.3",
@@ -35,6 +38,7 @@
   "scripts": {
     "test:gen": "./node_modules/.bin/ts-node src/run.ts -- ./test/service.proto",
     "test": "npm run test:gen && npx jest",
+    "lint": "npx eslint . --ext .ts",
     "dist:cp-templates": "find src -name '*.hbs' -exec cp {} dist \\;",
     "dist": "rm -rf ./dist && tsc && npm run dist:cp-templates",
     "prerelease": "npm run test && npm run dist"
