@@ -33,10 +33,10 @@
     "typescript": "^3.2.1"
   },
   "scripts": {
-    "testgen": "./node_modules/.bin/ts-node src/run.ts -- ./test/service.proto",
-    "cp-templates": "find src -name '*.hbs' -exec cp {} dist \\;",
-    "dist": "rm -rf ./dist && tsc && yarn cp-templates",
-    "ci": "yarn testgen && yarn jest",
-    "prerelease": "npm run ci && npm run dist"
+    "test:gen": "./node_modules/.bin/ts-node src/run.ts -- ./test/service.proto",
+    "test": "npm run test:gen && npx jest",
+    "dist:cp-templates": "find src -name '*.hbs' -exec cp {} dist \\;",
+    "dist": "rm -rf ./dist && tsc && npm run dist:cp-templates",
+    "prerelease": "npm run test && npm run dist"
   }
 }
