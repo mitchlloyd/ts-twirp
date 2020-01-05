@@ -11,7 +11,7 @@ type Router<T> = (
   url: string | undefined,
   contentType: TwirpContentType,
 ) => undefined | TwirpHandler<T>;
-type TwirpHandler<T> = (data: Buffer, rpcHandlers: T) => Promise<Uint8Array | String>;
+export type TwirpHandler<T> = (data: Buffer, rpcHandlers: T) => Promise<Uint8Array | string>;
 
 function getContentType(mimeType: string | undefined): TwirpContentType {
   switch (mimeType) {
@@ -29,7 +29,7 @@ export async function handleRequest<T>(
   res: http.ServerResponse,
   getTwirpHandler: Router<T>,
   rpcHandlers: T,
-) {
+): Promise<void> {
   if (req.method !== 'POST') {
     writeError(
       res,
@@ -90,7 +90,7 @@ export function getRequestData(req: http.IncomingMessage): Promise<Buffer> {
   });
 }
 
-export function writeError(res: http.ServerResponse, error: Error | errors.TwirpError) {
+export function writeError(res: http.ServerResponse, error: Error | errors.TwirpError): void {
   res.setHeader('Content-Type', 'application/json');
 
   let twirpError: errors.TwirpError;

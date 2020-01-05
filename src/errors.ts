@@ -138,8 +138,8 @@ export class BadRouteError extends TwirpError {
 // The mapping is similar to gRPC: https://github.com/grpc/grpc/blob/master/doc/http-grpc-status-mapping.md.
 export function twirpErrorFromIntermediary(
   status: number,
-  msg: string,
-  bodyOrLocation: string,
+  // msg: string,
+  // bodyOrLocation: string,
 ): TwirpErrorCode {
   let code = TwirpErrorCode.Unknown;
   if (status >= 300 && status <= 399) {
@@ -148,17 +148,22 @@ export function twirpErrorFromIntermediary(
     switch (status) {
       case 400: // Bad Request
         code = TwirpErrorCode.Internal;
+        break;
       case 401: // Unauthorized
         code = TwirpErrorCode.Unauthenticated;
+        break;
       case 403: // Forbidden
         code = TwirpErrorCode.PermissionDenied;
+        break;
       case 404: // Not Found
         code = TwirpErrorCode.BadRoute;
+        break;
       case 429: // Too Many Requests
       case 502: // Bad Gateway
       case 503: // Service Unavailable
       case 504: // Gateway Timeout
         code = TwirpErrorCode.Unavailable;
+        break;
       default:
         // All other codes
         code = TwirpErrorCode.Unknown;

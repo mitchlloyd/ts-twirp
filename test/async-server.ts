@@ -30,9 +30,15 @@ export class AsyncServer {
     });
   }
 
-  close() {
-    return new Promise(resolve => {
-      this.server.close(resolve);
+  close(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.server.close((err) => {
+        if (err) {
+          reject(err);
+        } else {
+          resolve();
+        }
+      });
     });
   }
 }
