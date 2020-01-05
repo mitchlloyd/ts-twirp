@@ -28,7 +28,7 @@ beforeAll(async () => {
 });
 
 afterAll(async () => {
-  server.close();
+  await server.close();
 });
 
 test('Handling a Twirp protobuf call', async () => {
@@ -77,7 +77,7 @@ test('Handling a Twirp JSON call', async () => {
 
 test('Protobuf error is returned as JSON', async () => {
   server.handler = createHaberdasherHandler({
-    makeHat(size: Example.Size) {
+    makeHat(/* size: Example.Size */) {
       throw new Error('thrown!');
     },
   });

@@ -48,7 +48,7 @@ export function createProtobufRPCImpl(params: CreateTwirpRPCImplParams): RPCImpl
 }
 
 interface JSONReadyObject {
-  toJSON: () => { [key: string]: any };
+  toJSON: () => { [key: string]: unknown };
 }
 
 export type JSONRPCImpl = (obj: JSONReadyObject, methodName: string) => Promise<{}>;
@@ -103,14 +103,14 @@ function getTwirpError(data: Uint8Array): Error {
   return error;
 }
 
-export function jsonToMessageProperties(buffer: Buffer) {
+export function jsonToMessageProperties(buffer: Buffer): JSONObject {
   const json = buffer.toString();
   const obj = JSON.parse(json);
 
   return camelCaseKeys(obj);
 }
 
-function camelCaseKeys(obj: JSONObject) {
+function camelCaseKeys(obj: JSONObject): JSONObject {
   let newObj: JSONObject;
   if (Array.isArray(obj)) {
     return obj.map(value => {
@@ -121,18 +121,19 @@ function camelCaseKeys(obj: JSONObject) {
     });
   } else {
     newObj = {};
-    for (let [key, value] of Object.entries(obj)) {
+    for (const [key, value] of Object.entries(obj)) {
+      let camelizedValue = value;
       if (isJSONObject(value)) {
-        value = camelCaseKeys(value);
+        camelizedValue = camelCaseKeys(value);
       }
-      newObj[util.camelCase(key)] = value;
+      newObj[util.camelCase(key)] = camelizedValue;
     }
   }
 
   return newObj;
 }
 
-type JSONObject = { [key: string]: unknown };
+type JSONObject = { [key: string]: unknown } | unknown[];
 
 function isJSONObject(value: unknown): value is JSONObject {
   return Array.isArray(value) || (value !== null && typeof value === 'object');
