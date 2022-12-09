@@ -35,6 +35,7 @@ async function run(): Promise<void> {
   pbts.main(['-o', typeDefsPath, runtimeJSPath]);
 
   const root = await load(protofilePath);
+  root.resolveAll()
   const descriptor = (root as RootWithToDescriptor).toDescriptor('proto3');
   const service = root.lookupService(getServiceName(descriptor));
   const namespace = service.fullName
